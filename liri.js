@@ -10,19 +10,17 @@ const spotify = new Spotify(keys.spotify);
 const client = new Twitter(keys.twitter);
 
 const inputCommand = process.argv[2];
-const inputName = process.argv[3];
-
-
+const inputName = process.argv.filter(element => process.argv.indexOf(element) >= 3).join(' ');
 
 //get the latest 20 tweets and display its contents & time created; twitter defaults at 20 counts
 const getTweet = () => {
-        client.get('statuses/user_timeline', function (error, tweets, response) {
-            var tweetDisplay = tweets.map(element => {
-                return `Tweet: ${element.text}           Created at: ${element.created_at}`
-            });
-            console.log(tweetDisplay);
+    client.get('statuses/user_timeline', function (error, tweets, response) {
+        var tweetDisplay = tweets.map(element => {
+            return `Tweet: ${element.text}           Created at: ${element.created_at}`
         });
-    }
+        console.log(tweetDisplay);
+    });
+}
 
 // get song info from Spotify and display its info
 const getSong = (inputSong) => {
@@ -105,11 +103,11 @@ const runLIRI = (command, name) => {
         getMovie(name);
     }
     else if (command == 'do-what-it-says') {
-        fs.readFile('./random.txt', 'utf8', (err,data) => {
-            if(err) throw err;
+        fs.readFile('./random.txt', 'utf8', (err, data) => {
+            if (err) throw err;
             commandInFile = data.split(',')[0];
             nameInFile = data.split(',')[1];
-            runLIRI(commandInFile,nameInFile);
+            runLIRI(commandInFile, nameInFile);
         })
     }
 }
