@@ -4,23 +4,27 @@ const keys = require('./keys.js');
 const axios = require('axios');
 const Twitter = require('twitter');
 const Spotify = require('node-spotify-api');
+const fs = require('fs');
 
 const spotify = new Spotify(keys.spotify);
 const client = new Twitter(keys.twitter);
 
-// console.log(spotify);
-// console.log(client);
+const inputCommand = process.argv[2];
+const inputName = process.argv[3];
+
+
 
 //get the latest 20 tweets and display its contents & time created; twitter defaults at 20 counts
 const getTweet = () => {
-    client.get('statuses/user_timeline', function (error, tweets, response) {
-        var tweetDisplay = tweets.map(element => {
-            return `Tweet: ${element.text}           Created at: ${element.created_at}`
+        client.get('statuses/user_timeline', function (error, tweets, response) {
+            var tweetDisplay = tweets.map(element => {
+                return `Tweet: ${element.text}           Created at: ${element.created_at}`
+            });
+            console.log(tweetDisplay);
         });
-        console.log(tweetDisplay);
-    });
-}
+    }
 
+// get song info from Spotify and display its info
 const getSong = (inputSong) => {
     let song;
     if (!inputSong) {
@@ -45,13 +49,14 @@ Album: ${albumName}
     });
 }
 
+//get movie info from OMDB api and display
 const getMovie = (inputMovie) => {
     let movieName;
 
     if (!inputMovie) movieName = 'Up';
     else movieName = inputMovie;
 
-    const omdbURL = `https://omdbapi.com/?t=Totoro&apikey=trilogy`;
+    const omdbURL = `https://omdbapi.com/?t=${movieName}&apikey=trilogy`;
     axios.get(omdbURL)
         .then(function (resp) {
             // console.log(resp.data);
@@ -88,4 +93,25 @@ Actors: ${actors}`
         .catch(function (err) { console.error(err) });
 }
 
-getMovie();
+//function to run liri based on user input
+const runLIRI = (command, name) => {
+    if (command == 'my-tweets') {
+        getTweet();
+    }
+    else if (command == 'spotify-this-song') {
+        getSong(name);
+    }
+    else if (command == 'movie-this') {
+        getMovie(name);
+    }
+    else if (command == 'do-what-it-says') {
+        fs.readFile('./random.txt', 'utf8', (err,data) => {
+            if(err) throw err;
+            commandInFile = data.split(',')[0];
+            nameInFile = data.split(',')[1];
+            runLIRI(commandInFile,nameInFile);
+        })
+    }
+}
+
+runLIRI(inputCommand, inputName);
