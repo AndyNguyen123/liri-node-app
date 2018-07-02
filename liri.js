@@ -21,7 +21,12 @@ const getTweet = () => {
     });
 }
 
-const getSong = (song) => {
+const getSong = (inputSong) => {
+    let song;
+    if (!inputSong) {
+        song = 'Panda';
+    }
+    else song = inputSong;
     spotify.search({ type: 'track', query: song }, function (err, data) {
         if (err) {
             return console.log('Error occurred: ' + err);
@@ -39,3 +44,48 @@ Album: ${albumName}
             `);
     });
 }
+
+const getMovie = (inputMovie) => {
+    let movieName;
+
+    if (!inputMovie) movieName = 'Up';
+    else movieName = inputMovie;
+
+    const omdbURL = `https://omdbapi.com/?t=Totoro&apikey=trilogy`;
+    axios.get(omdbURL)
+        .then(function (resp) {
+            // console.log(resp.data);
+            if (resp.data.Response === 'False') console.log('No Movie Found!');
+            else {
+
+                const movieData = resp.data;
+                const movieTitle = movieData.Title;
+                const movieYear = movieData.Year;
+                const imdbRating = movieData.imdbRating;
+                let rottenTomatoRating;
+                movieData.Ratings.forEach(object => {
+                    if (object.Source === 'Rotten Tomatoes') {
+                        rottenTomatoRating = object.Value;
+                    }
+                });
+                const country = movieData.Country;
+                const language = movieData.Language;
+                const plot = movieData.Plot;
+                const actors = movieData.Actors;
+
+                console.log(
+                    `Title: ${movieTitle}
+Year: ${movieYear}
+IMDB Rating: ${imdbRating}
+Rotten Tomatoes Rating: ${rottenTomatoRating}
+Country: ${country}
+Language: ${language}
+Plot: ${plot}
+Actors: ${actors}`
+                )
+            }
+        })
+        .catch(function (err) { console.error(err) });
+}
+
+getMovie();
